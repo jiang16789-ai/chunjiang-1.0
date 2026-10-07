@@ -5,6 +5,11 @@
 _paper_build.py
 _paper_jiang.html
 
+# arXiv 双栏脚本及其产物（含署名人名，绝不进公开仓库）
+_make_arxiv_pdf.py
+_paper_arxiv.html
+_arxiv_preview.png
+
 # Python
 __pycache__/
 *.pyc
