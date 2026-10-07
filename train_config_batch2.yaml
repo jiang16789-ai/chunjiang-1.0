@@ -1,0 +1,65 @@
+# chunjiang1.0 第二批微调配置（8B · MLX LoRA · 4bit 基座）
+# 本机核验 mlx-lm 0.31.3 字段
+# 决策：第二批新建 LoRA 从头训，不续训第一批（第一批 val Iter900 见底 0.940 → Iter1000 反弹 0.957 = 过拟合开始）
+# 跑法：
+#   python3 -m mlx_lm lora --config train_config_batch2.yaml
+#
+# OOM 兜底（只改这两行，其余不动）：
+#   batch_size: 4
+#   iters: 950
+
+model: ~/.cache/huggingface/hub/models--mlx-community--Qwen3-8B-4bit/snapshots/545dc4251c05440727734bcd94334791f6ab0192
+data: /path/to/chunjiang1.0/data/train
+
+train: true
+test: false
+fine_tune_type: lora
+
+# 沿用第一批 mask_prompt，seed 同第一批
+mask_prompt: true
+seed: 42
+
+# 优化器：第一批 Adam 无权重衰减；第二批换 AdamW 给 adapter 轻约束
+optimizer: adamw
+optimizer_config:
+  adamw:
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+
+# LR：6e-5（第一批 1e-4 已过拟合，降 40% 保守档）
+learning_rate: 6.0e-5
+lr_schedule:
+  name: cosine_decay
+  arguments: [6.0e-5, 720, 6.0e-6]
+  warmup: 60
+  warmup_init: 0.0
+
+# 训练长度：720 iter × batch 6 ≈ 1.14 epoch（低于第一批 1.30 epoch 见底位）
+iters: 720
+batch_size: 6
+grad_accumulation_steps: 1
+
+# 序列：语料压短到 1500-2000 字后 3072 足够，比 4096 省内存/截断浪费
+max_seq_length: 3072
+grad_checkpoint: true
+clear_cache_threshold: 0
+
+# 验证/存档：每 50 iter 存点，方便回滚到真实最低 val
+steps_per_report: 10
+steps_per_eval: 50
+val_batches: -1
+save_every: 50
+
+# Adapter 输出
+adapter_path: /path/to/chunjiang1.0/adapters/chunjiang1.0-batch2-r8-lr6e5
+
+# LoRA：rank 16→8（砍半容量压 gap），dropout 0→0.05（轻正则），scale 保持默认 20
+num_layers: 16
+lora_parameters:
+  rank: 8
+  scale: 20.0
+  dropout: 0.05
+
+# 训完选最低 val checkpoint 后再全量评估 test
+test_batches: -1

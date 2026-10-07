@@ -1,0 +1,10 @@
+# 敏感扫描报告（含 pattern 词，绝不公开）
+.sensitive-scan.txt
+
+# 私享版论文构建产物（含署名人名，绝不进公开仓库）
+_paper_build.py
+_paper_jiang.html
+
+# Python
+__pycache__/
+*.pyc

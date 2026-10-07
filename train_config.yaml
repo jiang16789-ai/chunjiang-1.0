@@ -1,0 +1,27 @@
+# chunjiang1.0 首训配置（8B · MLX LoRA · 4bit 基座）
+# 2026-10-05 22:45 调参：lr 3e-4→1e-4，加 warmup(50步)+cosine decay，batch 保持 4（显存峰值已 29.9GB，加不动）
+model: ~/.cache/huggingface/hub/models--mlx-community--Qwen3-8B-4bit/snapshots/545dc4251c05440727734bcd94334791f6ab0192
+train: true
+data: /path/to/chunjiang1.0/data/train
+fine_tune_type: lora
+lora_parameters:
+  rank: 16
+  scale: 20.0
+  dropout: 0.0
+num_layers: 16
+batch_size: 4
+iters: 1000
+learning_rate: 1e-4
+lr_schedule:
+  name: cosine_decay
+  arguments: [0.0001, 1000]
+  warmup: 50
+  warmup_init: 0.0
+max_seq_length: 4096
+mask_prompt: true
+adapter_path: /path/to/chunjiang1.0/adapters/chunjiang1.0-v1
+steps_per_report: 10
+steps_per_eval: 100
+val_batches: 25
+grad_checkpoint: true
+seed: 42

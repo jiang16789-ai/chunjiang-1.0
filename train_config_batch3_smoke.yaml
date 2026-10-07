@@ -1,0 +1,40 @@
+# smoke 测试配置：验证 resume 加载 + max_seq 4096 内存，跑 5 iter 即停
+model: ~/.cache/huggingface/hub/models--mlx-community--Qwen3-8B-4bit/snapshots/545dc4251c05440727734bcd94334791f6ab0192
+data: /path/to/chunjiang1.0/data/train_local_batch3
+
+train: true
+test: false
+fine_tune_type: lora
+resume_adapter_file: /path/to/chunjiang1.0/adapters/chunjiang1.0-batch2-r8-lr6e5/adapters.safetensors
+adapter_path: /path/to/chunjiang1.0/adapters/_smoke_batch3
+
+mask_prompt: true
+seed: 42
+optimizer: adamw
+optimizer_config:
+  adamw:
+    weight_decay: 0.01
+    betas: [0.9, 0.95]
+    eps: 1.0e-8
+learning_rate: 2.0e-5
+lr_schedule:
+  name: cosine_decay
+  arguments: [2.0e-5, 5, 2.0e-6]
+  warmup: 1
+  warmup_init: 0.0
+iters: 5
+batch_size: 6
+grad_accumulation_steps: 1
+max_seq_length: 4096
+grad_checkpoint: true
+clear_cache_threshold: 0
+steps_per_report: 1
+steps_per_eval: 5
+val_batches: -1
+save_every: 100
+num_layers: 16
+lora_parameters:
+  rank: 8
+  scale: 20.0
+  dropout: 0.05
+test_batches: -1
